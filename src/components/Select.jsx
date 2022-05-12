@@ -1,7 +1,6 @@
 import React from "react";
 
 const Select = ({ options, onSelectChange, value }) => {
-	console.log(options);
 	return (
 		<select onChange={onSelectChange} name="" id="">
 			<option value={value}>--Select {value}--</option>

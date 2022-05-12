@@ -11,17 +11,30 @@ const Filter = () => {
 	const [generationId, setGenerationId] = React.useState();
 	const [engines, setEngines] = React.useState([]);
 	const [engineId, setEngineId] = React.useState();
-	const [vehicle, setVehicle] = React.useState(null);
+	const [vehicle, setVehicle] = React.useState();
 
 	React.useEffect(() => {
-		fetch("https://sevsnab.ru/api/brands")
-			.then((response) => response.json())
-			.then((data) => setBrands(data.data));
+		const getBrands = () => {
+			const config = {
+				method: "get",
+				url: "https://sevsnab.ru/api/brands",
+				headers: {
+					"Content-Type": "application/json",
+					Accept: "application/json",
+				},
+			};
+			axios(config).then((response) => {
+				setBrands(response.data.data);
+			});
+		};
+		getBrands();
 	}, []);
 
 	const onBrandChange = (e) => {
-		const value = e.target.value;
-		setBrandId(Number(value));
+		const value = Number(e.target.value);
+		setBrandId(value);
+		setGenerations([]);
+		setEngines([]);
 		setVehicle(null);
 	};
 
@@ -42,14 +55,11 @@ const Filter = () => {
 		};
 
 		getModelsByBrand();
-		setGenerations([]);
-		setEngines([]);
 	}, [brandId]);
 
 	const onModelChange = (e) => {
-		const value = e.target.value;
-		setModelId(Number(value));
-		setGenerations([]);
+		const value = Number(e.target.value);
+		setModelId(value);
 		setEngines([]);
 		setVehicle(null);
 	};
@@ -74,14 +84,14 @@ const Filter = () => {
 	}, [modelId]);
 
 	const onGenerationChange = (e) => {
-		const value = e.target.value;
-		setGenerationId(Number(value));
-		setEngines(generations.find((generation) => generation.id === Number(value)).engines);
+		const value = Number(e.target.value);
+		setGenerationId(value);
+		setEngines(generations.find((generation) => generation.id === value).engines);
 	};
 
 	const onEngineChange = (e) => {
-		const value = e.target.value;
-		setEngineId(Number(value));
+		const value = Number(e.target.value);
+		setEngineId(value);
 	};
 
 	React.useEffect(() => {
