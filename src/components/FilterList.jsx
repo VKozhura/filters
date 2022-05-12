@@ -1,11 +1,6 @@
 import React from "react";
 import axios from "axios";
-
-const getBrands = async () => {
-	const response = await fetch("https://sevsnab.ru/api/brands");
-	const brands = await response.json();
-	return brands.data;
-};
+import Select from "./Select";
 
 const Filter = () => {
 	const [brands, setBrands] = React.useState([]);
@@ -111,41 +106,11 @@ const Filter = () => {
 
 	return (
 		<div>
-			<select onChange={onBrandChange} name="" id="">
-				<option value="">--Select Brand--</option>
-				{brands.map((brand) => (
-					<option key={brand.id} value={brand.id}>
-						{brand.name}
-					</option>
-				))}
-			</select>
+			<Select value={"Brand"} options={brands} onSelectChange={onBrandChange} />
+			<Select value={"Model"} options={models} onSelectChange={onModelChange} />
+			<Select value={"Generation"} options={generations} onSelectChange={onGenerationChange} />
+			<Select value={"Engine"} options={engines} onSelectChange={onEngineChange} />
 
-			<select onChange={onModelChange} name="" id="">
-				<option value="">--Select Model--</option>
-				{models.map((model) => (
-					<option key={model.id} value={model.id}>
-						{model.name}
-					</option>
-				))}
-			</select>
-
-			<select onChange={onGenerationChange} name="" id="">
-				<option value="">--Select Generation--</option>
-				{generations.map((generation) => (
-					<option key={generation.id} value={generation.id}>
-						{generation.name ? `${generation.name},${generation.years}` : generation.years}
-					</option>
-				))}
-			</select>
-
-			<select onChange={onEngineChange} name="" id="">
-				<option value="">--Select Engine--</option>
-				{engines.map((engine) => (
-					<option key={engine.id} value={engine.id}>
-						{engine.name}
-					</option>
-				))}
-			</select>
 			<p>{vehicle}</p>
 		</div>
 	);
