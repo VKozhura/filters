@@ -14,6 +14,9 @@ const Filter = () => {
 	const [modelId, setModelId] = React.useState();
 	const [generations, setGenerations] = React.useState([]);
 	const [generationId, setGenerationId] = React.useState();
+	const [engines, setEngines] = React.useState([]);
+	const [engineId, setEngineId] = React.useState();
+	const [vehicle, setVehicle] = React.useState(null);
 
 	React.useEffect(() => {
 		fetch("https://sevsnab.ru/api/brands")
@@ -23,7 +26,8 @@ const Filter = () => {
 
 	const onBrandChange = (e) => {
 		const value = e.target.value;
-		setBrandId(value);
+		setBrandId(Number(value));
+		setVehicle(null);
 	};
 
 	React.useEffect(() => {
@@ -43,11 +47,16 @@ const Filter = () => {
 		};
 
 		getModelsByBrand();
+		setGenerations([]);
+		setEngines([]);
 	}, [brandId]);
 
 	const onModelChange = (e) => {
 		const value = e.target.value;
-		setModelId(value);
+		setModelId(Number(value));
+		setGenerations([]);
+		setEngines([]);
+		setVehicle(null);
 	};
 
 	React.useEffect(() => {
@@ -71,10 +80,35 @@ const Filter = () => {
 
 	const onGenerationChange = (e) => {
 		const value = e.target.value;
-		setGenerationId(value);
+		setGenerationId(Number(value));
+		setEngines(generations.find((generation) => generation.id === Number(value)).engines);
 	};
 
-	console.log(generations);
+	const onEngineChange = (e) => {
+		const value = e.target.value;
+		setEngineId(Number(value));
+	};
+
+	React.useEffect(() => {
+		const getVehicle = () => {
+			const config = {
+				method: "get",
+				url: `https://sevsnab.ru/api/vehicles?carmodel_generation_id=${generationId}&engine_id=${engineId}`,
+				headers: {
+					"Content-Type": "application/json",
+					Accept: "application/json",
+				},
+			};
+
+			axios(config).then((response) => {
+				const vehicleName = response.data.data.map((vehicle) => vehicle.name);
+				setVehicle(vehicleName);
+			});
+		};
+
+		getVehicle();
+	}, [generationId, engineId]);
+
 	return (
 		<div>
 			<select onChange={onBrandChange} name="" id="">
@@ -104,16 +138,15 @@ const Filter = () => {
 				))}
 			</select>
 
-			<select name="" id="">
+			<select onChange={onEngineChange} name="" id="">
 				<option value="">--Select Engine--</option>
-				{/* {generations
-					.find((generation) => generation.id === generationId)
-					.engines.map((engine) => (
-						<option key={engine.id} value={engine.id}>
-							{engine.name}
-						</option>
-					))} */}
+				{engines.map((engine) => (
+					<option key={engine.id} value={engine.id}>
+						{engine.name}
+					</option>
+				))}
 			</select>
+			<p>{vehicle}</p>
 		</div>
 	);
 };
