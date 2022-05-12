@@ -36,6 +36,9 @@ const Filter = () => {
 		setGenerations([]);
 		setEngines([]);
 		setVehicle(null);
+		setModelId();
+		setGenerationId();
+		setEngineId();
 	};
 
 	React.useEffect(() => {
@@ -61,6 +64,8 @@ const Filter = () => {
 		const value = Number(e.target.value);
 		setModelId(value);
 		setEngines([]);
+		setGenerationId();
+		setEngineId();
 		setVehicle(null);
 	};
 
@@ -86,7 +91,9 @@ const Filter = () => {
 	const onGenerationChange = (e) => {
 		const value = Number(e.target.value);
 		setGenerationId(value);
-		setEngines(generations.find((generation) => generation.id === value).engines);
+		setEngineId();
+		const engines = generations.find((generation) => generation.id === value).engines;
+		setEngines(engines);
 	};
 
 	const onEngineChange = (e) => {
@@ -106,8 +113,15 @@ const Filter = () => {
 			};
 
 			axios(config).then((response) => {
-				const vehicleName = response.data.data.map((vehicle) => vehicle.name);
-				setVehicle(vehicleName);
+				const vehicle = response.data.data.reduce((vehicleMap, vehicle) => {
+					return {
+						...vehicleMap,
+						...vehicle,
+					};
+				}, {});
+				console.log(vehicle);
+				setVehicle(vehicle.name);
+				console.log(vehicle.name, vehicle.formfactor.id, vehicle.polarity.id);
 			});
 		};
 
@@ -116,10 +130,30 @@ const Filter = () => {
 
 	return (
 		<div>
-			<Select value={"Brand"} options={brands} onSelectChange={onBrandChange} />
-			<Select value={"Model"} options={models} onSelectChange={onModelChange} />
-			<Select value={"Generation"} options={generations} onSelectChange={onGenerationChange} />
-			<Select value={"Engine"} options={engines} onSelectChange={onEngineChange} />
+			<Select
+				selectedValue={brandId}
+				value={"Brand"}
+				options={brands}
+				onSelectChange={onBrandChange}
+			/>
+			<Select
+				selectedValue={modelId}
+				value={"Model"}
+				options={models}
+				onSelectChange={onModelChange}
+			/>
+			<Select
+				selectedValue={generationId}
+				value={"Generation"}
+				options={generations}
+				onSelectChange={onGenerationChange}
+			/>
+			<Select
+				selectedValue={engineId}
+				value={"Engine"}
+				options={engines}
+				onSelectChange={onEngineChange}
+			/>
 
 			<p>{vehicle}</p>
 		</div>
