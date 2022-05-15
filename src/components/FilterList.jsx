@@ -31,17 +31,7 @@ const Filter = () => {
 	}, []);
 
 	const onBrandChange = (e) => {
-		const value = Number(e.target.value);
-		setBrandId(value);
-		setGenerations([]);
-		setEngines([]);
-		setVehicle(null);
-		setModelId();
-		setGenerationId();
-		setEngineId();
-	};
-
-	React.useEffect(() => {
+		const brandId = Number(e.target.value);
 		const getModelsByBrand = () => {
 			const config = {
 				method: "get",
@@ -58,22 +48,21 @@ const Filter = () => {
 		};
 
 		getModelsByBrand();
-	}, [brandId]);
+		setBrandId(brandId);
+		setGenerations([]);
+		setEngines([]);
+		setVehicle(null);
+		setModelId();
+		setGenerationId();
+		setEngineId();
+	};
 
 	const onModelChange = (e) => {
 		const value = Number(e.target.value);
-		setModelId(value);
-		setEngines([]);
-		setGenerationId();
-		setEngineId();
-		setVehicle(null);
-	};
-
-	React.useEffect(() => {
 		const getGenerationsByModel = () => {
 			const config = {
 				method: "get",
-				url: `https://sevsnab.ru/api/generations?carmodel_id=${modelId}`,
+				url: `https://sevsnab.ru/api/generations?carmodel_id=${value}`,
 				headers: {
 					"Content-Type": "application/json",
 					Accept: "application/json",
@@ -86,26 +75,27 @@ const Filter = () => {
 		};
 
 		getGenerationsByModel();
-	}, [modelId]);
+		setModelId(value);
+		setEngines([]);
+		setGenerationId();
+		setEngineId();
+		setVehicle(null);
+	};
 
 	const onGenerationChange = (e) => {
 		const value = Number(e.target.value);
 		setGenerationId(value);
-		setEngineId();
 		const engines = generations.find((generation) => generation.id === value).engines;
 		setEngines(engines);
+		setEngineId();
 	};
 
 	const onEngineChange = (e) => {
 		const value = Number(e.target.value);
-		setEngineId(value);
-	};
-
-	React.useEffect(() => {
 		const getVehicle = () => {
 			const config = {
 				method: "get",
-				url: `https://sevsnab.ru/api/vehicles?carmodel_generation_id=${generationId}&engine_id=${engineId}`,
+				url: `https://sevsnab.ru/api/vehicles?carmodel_generation_id=${generationId}&engine_id=${value}`,
 				headers: {
 					"Content-Type": "application/json",
 					Accept: "application/json",
@@ -113,23 +103,56 @@ const Filter = () => {
 			};
 
 			axios(config).then((response) => {
-				const vehicle = response.data.data.reduce((vehicleMap, vehicle) => {
-					return {
-						...vehicleMap,
-						...vehicle,
+				let vehicleData;
+				if (response.data.data.length !== 0) {
+					const vehicle = response.data.data.reduce((vehicleMap, vehicle) => {
+						return {
+							...vehicleMap,
+							...vehicle,
+						};
+					}, {});
+					setVehicle(vehicle.name);
+					vehicleData = {
+						name: vehicle.name,
+						formfactorId: vehicle.formfactor.id,
+						polarityId: vehicle.polarity.id,
 					};
-				}, {});
-				console.log(vehicle);
-				setVehicle(vehicle.name);
-				console.log(vehicle.name, vehicle.formfactor.id, vehicle.polarity.id);
+					console.log(vehicleData);
+				} else {
+					setVehicle(null);
+					vehicleData = {
+						name: null,
+						formfactorId: null,
+						polarityId: null,
+					};
+					console.log(vehicleData);
+				}
 			});
 		};
 
 		getVehicle();
-	}, [generationId, engineId]);
+		setEngineId(value);
+	};
+
+	const onPutData = (e) => {
+		const getBrands = () => {
+			const config = {
+				method: "get",
+				url: "https://sevsnab.ru/api/brands",
+				headers: {
+					"Content-Type": "application/json",
+					Accept: "application/json",
+				},
+			};
+			axios(config).then((response) => {
+				console.log(response.data.data);
+			});
+		};
+		getBrands();
+	};
 
 	return (
-		<div>
+		<div className="block-finder__form">
 			<Select
 				selectedValue={brandId}
 				value={"Brand"}
@@ -154,7 +177,12 @@ const Filter = () => {
 				options={engines}
 				onSelectChange={onEngineChange}
 			/>
-
+			<button
+				className="block-finder__form-control block-finder__form-control--button"
+				onClick={onPutData}
+			>
+				Search
+			</button>
 			<p>{vehicle}</p>
 		</div>
 	);
