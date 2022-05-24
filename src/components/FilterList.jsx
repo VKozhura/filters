@@ -12,6 +12,7 @@ const Filter = () => {
 	const [engines, setEngines] = React.useState([]);
 	const [engineId, setEngineId] = React.useState();
 	const [vehicle, setVehicle] = React.useState();
+	const [loading, setLoading] = React.useState(false);
 
 	React.useEffect(() => {
 		const getBrands = () => {
@@ -117,7 +118,7 @@ const Filter = () => {
 						formfactorId: vehicle.formfactor.id,
 						polarityId: vehicle.polarity.id,
 					};
-                    setVehicle(vehicleData);
+					setVehicle(vehicleData);
 					// console.log(vehicleData);
 				} else {
 					setVehicle(null);
@@ -135,23 +136,26 @@ const Filter = () => {
 		setEngineId(value);
 	};
 
-	const onPutData = vehicle => () => {
-        // console.log(vehicle);
-        const token = document.getElementsByTagName('meta')['csrf-token'].content;
+	const onPutData = (vehicle) => () => {
+		setLoading(true);
+		// console.log(vehicle);
+		const token = document.getElementsByTagName("meta")["csrf-token"].content;
 		const getBrands = () => {
 			const config = {
 				method: "post",
-				url: "/api/putVehicleToSession",
+				url: "https://sevsnab.ru/api/putVehicleToSession",
 				headers: {
-                    "_token": token,
+					_token: token,
 					"Content-Type": "application/json",
 					Accept: "application/json",
 				},
-                data : JSON.stringify({
-                    ...vehicle
-                })
+				data: JSON.stringify({
+					...vehicle,
+				}),
 			};
 			axios(config).then((response) => {
+				window.location.replace("https://sevsnab.ru/categories/1");
+				setLoading(false);
 				// console.log(response.data.data);
 			});
 		};
@@ -187,8 +191,9 @@ const Filter = () => {
 			<button
 				className="block-finder__form-control block-finder__form-control--button"
 				onClick={onPutData(vehicle)}
+				disabled={!engineId}
 			>
-				Подобрать
+				{loading ? "Подбираем..." : "Подобрать"}
 			</button>
 		</div>
 	);
