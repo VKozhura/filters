@@ -17,7 +17,7 @@ const Filter = () => {
 		const getBrands = () => {
 			const config = {
 				method: "get",
-				url: "https://sevsnab.ru/api/brands",
+				url: "/api/brands",
 				headers: {
 					"Content-Type": "application/json",
 					Accept: "application/json",
@@ -35,7 +35,7 @@ const Filter = () => {
 		const getModelsByBrand = () => {
 			const config = {
 				method: "get",
-				url: `https://sevsnab.ru/api/carmodels?brand_id=${brandId}`,
+				url: `/api/carmodels?brand_id=${brandId}`,
 				headers: {
 					"Content-Type": "application/json",
 					Accept: "application/json",
@@ -62,7 +62,7 @@ const Filter = () => {
 		const getGenerationsByModel = () => {
 			const config = {
 				method: "get",
-				url: `https://sevsnab.ru/api/generations?carmodel_id=${value}`,
+				url: `/api/generations?carmodel_id=${value}`,
 				headers: {
 					"Content-Type": "application/json",
 					Accept: "application/json",
@@ -95,7 +95,7 @@ const Filter = () => {
 		const getVehicle = () => {
 			const config = {
 				method: "get",
-				url: `https://sevsnab.ru/api/vehicles?carmodel_generation_id=${generationId}&engine_id=${value}`,
+				url: `/api/vehicles?carmodel_generation_id=${generationId}&engine_id=${value}`,
 				headers: {
 					"Content-Type": "application/json",
 					Accept: "application/json",
@@ -111,13 +111,14 @@ const Filter = () => {
 							...vehicle,
 						};
 					}, {});
-					setVehicle(vehicle.name);
+
 					vehicleData = {
 						name: vehicle.name,
 						formfactorId: vehicle.formfactor.id,
 						polarityId: vehicle.polarity.id,
 					};
-					console.log(vehicleData);
+                    setVehicle(vehicleData);
+					// console.log(vehicleData);
 				} else {
 					setVehicle(null);
 					vehicleData = {
@@ -125,7 +126,7 @@ const Filter = () => {
 						formfactorId: null,
 						polarityId: null,
 					};
-					console.log(vehicleData);
+					// console.log(vehicleData);
 				}
 			});
 		};
@@ -134,18 +135,24 @@ const Filter = () => {
 		setEngineId(value);
 	};
 
-	const onPutData = (e) => {
+	const onPutData = vehicle => () => {
+        // console.log(vehicle);
+        const token = document.getElementsByTagName('meta')['csrf-token'].content;
 		const getBrands = () => {
 			const config = {
-				method: "get",
-				url: "https://sevsnab.ru/api/brands",
+				method: "post",
+				url: "/api/putVehicleToSession",
 				headers: {
+                    "_token": token,
 					"Content-Type": "application/json",
 					Accept: "application/json",
 				},
+                data : JSON.stringify({
+                    ...vehicle
+                })
 			};
 			axios(config).then((response) => {
-				console.log(response.data.data);
+				// console.log(response.data.data);
 			});
 		};
 		getBrands();
@@ -155,35 +162,34 @@ const Filter = () => {
 		<div className="block-finder__form">
 			<Select
 				selectedValue={brandId}
-				value={"Brand"}
+				value={"Марка"}
 				options={brands}
 				onSelectChange={onBrandChange}
 			/>
 			<Select
 				selectedValue={modelId}
-				value={"Model"}
+				value={"Модель"}
 				options={models}
 				onSelectChange={onModelChange}
 			/>
 			<Select
 				selectedValue={generationId}
-				value={"Generation"}
+				value={"Поколение"}
 				options={generations}
 				onSelectChange={onGenerationChange}
 			/>
 			<Select
 				selectedValue={engineId}
-				value={"Engine"}
+				value={"Двигатель"}
 				options={engines}
 				onSelectChange={onEngineChange}
 			/>
 			<button
 				className="block-finder__form-control block-finder__form-control--button"
-				onClick={onPutData}
+				onClick={onPutData(vehicle)}
 			>
-				Search
+				Подобрать
 			</button>
-			<p>{vehicle}</p>
 		</div>
 	);
 };
