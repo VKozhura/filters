@@ -138,12 +138,11 @@ const Filter = () => {
 
 	const onPutData = (vehicle) => () => {
 		setLoading(true);
-		// console.log(vehicle);
 		const token = document.getElementsByTagName("meta")["csrf-token"].content;
 		const getBrands = () => {
 			const config = {
 				method: "post",
-				url: "https://sevsnab.ru/api/putVehicleToSession",
+				url: "/api/putVehicleToSession",
 				headers: {
 					_token: token,
 					"Content-Type": "application/json",
@@ -154,7 +153,7 @@ const Filter = () => {
 				}),
 			};
 			axios(config).then((response) => {
-				window.location.replace("https://sevsnab.ru/categories/1");
+				window.location.replace(`/categories/1?formfactorId=${vehicle.formfactorId}&polarityId=${vehicle.polarityId}`);
 				setLoading(false);
 				// console.log(response.data.data);
 			});
